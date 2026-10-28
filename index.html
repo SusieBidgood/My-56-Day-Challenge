@@ -10,6 +10,19 @@
 /* Lesson 11: charts — read existing data without changing how it is saved. */
 .chart-shell{background:#1C1D1F;border:1px solid #504737;border-radius:14px;padding:12px;margin-top:12px}
 .chart-svg{width:100%;height:auto;display:block;overflow:visible}.chart-grid{stroke:#4A453B;stroke-width:1}.chart-axis{fill:#BCB2A1;font-size:12px}.chart-value{fill:#F8D893;font-size:11px}.chart-line{fill:none;stroke:#E7B85E;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}.chart-dot{fill:#161719;stroke:#F8D893;stroke-width:2}.chart-bar{fill:#D7A750}.chart-bar.latest{fill:#FFE0A0}.chart-note{font-size:.85rem;color:#D3C9B7;margin-top:10px}.chart-legend{display:flex;gap:12px;align-items:center;flex-wrap:wrap;color:#DDD2BF;font-size:.81rem}.chart-legend span::before{content:'';display:inline-block;width:10px;height:10px;background:#D7A750;border-radius:3px;margin-right:6px}.chart-summary{font-size:.9rem;color:#EEE0C6;margin-top:8px}
+
+/* Lesson 12: progress photo comparisons. No new data storage. */
+.compare-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:17px}
+.compare-tile{background:#1B1C1E;border:1px solid #594C36;border-radius:14px;padding:9px;min-width:0}
+.compare-heading{color:#E7B85E;font-weight:800;text-align:center;font-size:.88rem;margin:2px 0 9px}
+.compare-frame{aspect-ratio:3/4;background:#2B2B2D;border:1px solid #494439;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.compare-frame img{display:block;width:100%;height:100%;object-fit:contain;cursor:zoom-in}
+.compare-placeholder{padding:8px;color:#C5B9A5;text-align:center;font-size:.78rem;line-height:1.4}
+.compare-date{color:#BDB5A5;font-size:.73rem;text-align:center;margin-top:8px;min-height:1.2em}
+.compare-modal{border:1px solid #9A7B43;border-radius:15px;background:#191A1C;color:#F8E6C5;padding:15px;width:min(95vw,900px);max-height:92vh}
+.compare-modal::backdrop{background:rgba(0,0,0,.86)}
+.compare-modal img{max-width:100%;max-height:75vh;display:block;margin:10px auto;object-fit:contain}
+@media(max-width:420px){.compare-grid{gap:5px}.compare-tile{padding:5px}.compare-heading{font-size:.78rem}.compare-placeholder{font-size:.7rem;padding:3px}}
 </style></head><body><main>
 <div class="eyebrow">56 days · 8 daily habits · Your challenge</div><h1>8 Week Challenge</h1><p>Eight daily habits. Eight weeks. One day at a time.</p>
 <section class="card"><div id="startMessage" class="notice" hidden></div><div class="flex"><div><div class="eyebrow" id="weekTitle">Week 1 of 8</div><h2 id="dayTitle" style="margin:7px 0">Day 1 of 56</h2><div class="muted" id="dateTitle"></div></div><div style="text-align:right"><div class="big" id="dayPct">0%</div><div class="muted">Tasks completed</div></div></div><div class="bar" style="margin:18px 0"><div id="dayBar" class="fill"></div></div><div id="tasks"></div><div class="flex" style="margin-top:20px"><button class="secondary" id="prev">← Previous</button><button id="todayButton">Today</button><button class="secondary" id="next">Next →</button></div></section>
@@ -21,6 +34,8 @@
 <h3 style="color:#F6D18A;margin:18px 0 7px">Body-weight trend</h3><div class="chart-shell"><svg class="chart-svg" id="weightChart" viewBox="0 0 640 270" role="img" aria-label="Body weight by challenge day"></svg><div id="weightSummary" class="chart-summary" aria-live="polite"></div></div>
 <h3 style="color:#F6D18A;margin:22px 0 7px">Daily checklist completion</h3><div class="chart-shell"><svg class="chart-svg" id="completionChart" viewBox="0 0 640 275" role="img" aria-label="Completed tasks each day, across 56 days"></svg><div class="chart-legend" style="margin-top:8px"><span>Completed tasks (out of 8)</span></div><div id="completionSummary" class="chart-summary" aria-live="polite"></div></div>
 <p class="hint">The charts show all 56 days. Future days remain empty; an unticked past day appears as zero. Missing weight entries aren't treated as zero.</p></section>
+<section class="card" id="photoComparison"><h2>Progress photo comparison</h2><p class="hint">Compare your Day 1, Day 28 and Day 56 photos side by side. These use your existing saved progress pictures; no extra uploads are needed. Tap a photo to view it larger.</p><div class="compare-grid" id="compareGrid"><div class="compare-tile"><div class="compare-heading">Day 1</div><div class="compare-frame" id="compareFrame1"><span class="compare-placeholder">Checking saved photo…</span></div><div class="compare-date" id="compareDate1"></div></div><div class="compare-tile"><div class="compare-heading">Day 28</div><div class="compare-frame" id="compareFrame28"><span class="compare-placeholder">Checking saved photo…</span></div><div class="compare-date" id="compareDate28"></div></div><div class="compare-tile"><div class="compare-heading">Day 56</div><div class="compare-frame" id="compareFrame56"><span class="compare-placeholder">Checking saved photo…</span></div><div class="compare-date" id="compareDate56"></div></div></div><p class="hint">To add or change a comparison photo, choose Day 1, 28 or 56 in the 56-day overview, then use the existing <strong>Progress picture</strong> section. Future days unlock automatically.</p><p id="compareStatus" class="muted" aria-live="polite"></p></section>
+<dialog id="compareModal" class="compare-modal" aria-label="Enlarged progress photo"><div class="flex"><strong id="compareModalLabel">Progress photo</strong><button class="secondary" id="compareClose" type="button">Close ×</button></div><img id="compareModalImage" alt="Enlarged saved progress photo"></dialog>
 <section class="card"><h2>Backup &amp; restore</h2><p>Save a private backup file containing your checklist, weights, photos and challenge start date. Keep it somewhere safe, such as a private folder in Google Drive. Your photos and weight information are sensitive, so don't share this file.</p><div class="flex"><button id="exportBackup">Back Up My Data</button><label class="filebutton" for="importBackup">Restore My Data</label><input id="importBackup" type="file" accept=".json,application/json" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden" aria-label="Select backup JSON file"></div><p id="backupStatus" class="muted" role="status" aria-live="polite"></p><p class="hint">Restoring replaces the data currently saved in this app. Back up your current data first. Use Restore only with a backup file you created from this app.</p></section>
 <footer><strong>Privacy & saving:</strong> Checkmarks and weights are stored in this browser. Photos are stored on this device using browser storage. This app does not sync between devices or upload your data. Use the Backup &amp; restore buttons regularly and do not clear browser data; browser or device changes could erase your entries. The original challenge start date is kept when you update the app; a new start date is created only if no existing record is found.</footer>
 </main><script>
@@ -93,6 +108,40 @@ function renderCharts(){
  $('completionSummary').textContent=`${total} of ${max*8} possible tasks ticked through Day ${max} · ${full} ${full===1?'day':'days'} with all 8 completed.`;
 }
 
-const originalRender=render;render=function(){originalRender();renderCharts()};
+
+// Photo comparisons reuse the existing IndexedDB photo records for Days 1, 28 and 56.
+// No changes to the original data key or backup format.
+let compareVersion=0;
+const compareUrls=new Map();
+async function renderComparisons(){
+ const version=++compareVersion;
+ for(const day of [1,28,56]){
+  const frame=$('compareFrame'+day),date=$('compareDate'+day);
+  frame.replaceChildren();
+  const available=day<=lastAvailable();
+  date.textContent=addDays(data.start,day-1).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});
+  if(!available){const msg=document.createElement('span');msg.className='compare-placeholder';msg.textContent='Unlocks on Day '+day;frame.append(msg);continue}
+  try{
+   const blob=await photoGet(day);
+   if(version!==compareVersion)return;
+   const old=compareUrls.get(day);if(old){URL.revokeObjectURL(old);compareUrls.delete(day)}
+   if(!blob){const msg=document.createElement('span');msg.className='compare-placeholder';msg.textContent='No photo saved yet';frame.append(msg);continue}
+   const url=URL.createObjectURL(blob);compareUrls.set(day,url);
+   const img=document.createElement('img');img.src=url;img.alt='Progress photo for Day '+day;img.title='Tap to enlarge Day '+day;
+   img.tabIndex=0;img.setAttribute('role','button');
+   const enlarge=()=>{$('compareModalLabel').textContent='Day '+day+' progress photo';$('compareModalImage').src=url;$('compareModal').showModal()};
+   img.addEventListener('click',enlarge);img.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();enlarge()}});
+   frame.append(img);
+  }catch(err){if(version!==compareVersion)return;const msg=document.createElement('span');msg.className='compare-placeholder';msg.textContent='Photo unavailable';frame.append(msg);$('compareStatus').textContent='Some photos could not be read: '+err.message}
+ }
+}
+$('compareClose').addEventListener('click',()=>$('compareModal').close());
+$('compareModal').addEventListener('close',()=>{$('compareModalImage').removeAttribute('src')});
+const originalPhotoSet=photoSet;
+photoSet=async function(day,val){await originalPhotoSet(day,val);if([1,28,56].includes(Number(day)))await renderComparisons()};
+const originalPhotoRemove=photoRemove;
+photoRemove=async function(day){await originalPhotoRemove(day);if([1,28,56].includes(Number(day)))await renderComparisons()};
+
+const originalRender=render;render=function(){originalRender();renderCharts();renderComparisons()};
 render();document.addEventListener('visibilitychange',()=>{if(!document.hidden){selected=todayNumber();render()}});
 </script></body></html>
